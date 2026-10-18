@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  F1 Driver's Championship Backend using AWS Lambda, OpenF1 API, and AWS ElastiCache.
+
+Parameters:
+  RedisHost:
+    Type: String
+    Description: "ElastiCache Redis Primary Endpoint URL"
+  RedisPort:
+    Type: String
+    Default: "6379"
+  VpcSubnetIds:
+    Type: List<String>
+    Description: "Comma-separated list of Private Subnet IDs from VPC"
+  LambdaSecurityGroupId:
+    Type: String
+    Description: "Security Group ID for the Lambda function"
+
+Resources:
+  DriversChampionshipFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: python3.11
+      CodeUri: src/
+      Handler: drivers_championship.lambda_handler
+      Timeout: 15
+      MemorySize: 256
+      Environment:
+        Variables:
+          REDIS_HOST: !Ref RedisHost
+          REDIS_PORT: !Ref RedisPort
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /drivers_championship
+            Method: GET
+
+Outputs:
+  DriversChampionshipApiUrl:
+    Description: "API Gateway endpoint URL for Prod stage for Driver's Championship"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/drivers_championship"

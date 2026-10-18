@@ -1,0 +1,40 @@
+name: Deploy F1 Backend to AWS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up AWS SAM CLI
+        uses: aws-actions/setup-sam@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-southeast-1
+
+      - name: SAM Build
+        run: sam build
+
+      - name: SAM Deploy
+        run: |
+          sam deploy \
+            --stack-name f1-backend \
+            --region ap-southeast-1 \
+            --capabilities CAPABILITY_IAM \
+            --parameter-overrides RedisHost="f1-cache-aezpla.serverless.apse1.cache.amazonaws.com:6379" VpcSubnetIds="subnet-0f8d93b07beaf3a93,subnet-05cf3b5e0b389bd9b" LambdaSecurityGroupId="sg-0b74edb789c583f5c" \ 
+            --no-confirm-changeset
