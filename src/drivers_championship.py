@@ -4,7 +4,7 @@ import redis
 import requests
 
 # Initialize Redis client outside the handler to reuse connection across warm Lambda invocations
-REDIS_HOST = os.environ.get("REDIS_HOST", "your-elasticache-endpoint.cache.amazonaws.com")
+REDIS_HOST = os.environ.get("REDIS_HOST", "f1-cache-aezpla.serverless.apse1.cache.amazonaws.com:6379")
 REDIS_PORT = int(os.environ.get("REDIS_PORT", 6379))
 redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 
