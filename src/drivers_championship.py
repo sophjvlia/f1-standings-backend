@@ -87,27 +87,32 @@ def get_standings_for_year(year):
     return leaderboard
 
 # AWS Lambda Entry Point
-def lambda_handler(event, context):
-    # Get year from query string parameters (e.g., /standings?year=2024), default to 2026
-    query_params = event.get("queryStringParameters") or {}
-    year = query_params.get("year", "2026")
+# def lambda_handler(event, context):
+#     # Get year from query string parameters (e.g., /standings?year=2024), default to 2026
+#     query_params = event.get("queryStringParameters") or {}
+#     year = query_params.get("year", "2026")
     
-    try:
-        standings = get_standings_for_year(year)
-        return {
-            "statusCode": 200,
-            "headers": {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*"
-            },
-            "body": json.dumps(standings)
-        }
-    except Exception as e:
-        return {
-            "statusCode": 500,
-            "headers": {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*"
-            },
-            "body": json.dumps({"error": str(e)})
-        }
+#     try:
+#         standings = get_standings_for_year(year)
+#         return {
+#             "statusCode": 200,
+#             "headers": {
+#                 "Content-Type": "application/json",
+#                 "Access-Control-Allow-Origin": "*"
+#             },
+#             "body": json.dumps(standings)
+#         }
+#     except Exception as e:
+#         return {
+#             "statusCode": 500,
+#             "headers": {
+#                 "Content-Type": "application/json",
+#                 "Access-Control-Allow-Origin": "*"
+#             },
+#             "body": json.dumps({"error": str(e)})
+#         }
+def lambda_handler(event, context):
+    return {
+        "statusCode": 200,
+        "body": json.dumps({"status": "hello from lambda"})
+    }
