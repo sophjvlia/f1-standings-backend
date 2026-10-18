@@ -3,13 +3,13 @@ import os
 import redis
 import requests
 
+# Initialize Redis client outside the handler to reuse connection across warm Lambda invocations
+REDIS_HOST = os.environ.get("REDIS_HOST", "f1-cache-aezpla.serverless.apse1.cache.amazonaws.com:6379")
+REDIS_PORT = int(os.environ.get("REDIS_PORT", 6379))
+redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
+
 def lambda_handler(event, context):
     try:
-        # Initialize Redis client outside the handler to reuse connection across warm Lambda invocations
-        REDIS_HOST = os.environ.get("REDIS_HOST", "f1-cache-aezpla.serverless.apse1.cache.amazonaws.com:6379")
-        REDIS_PORT = int(os.environ.get("REDIS_PORT", 6379))
-        redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
-
         redis_client.ping()
 
         BASE_URL = "https://api.openf1.org/v1"
@@ -23,7 +23,8 @@ def lambda_handler(event, context):
                 "session_name": "Race",
                 "year": year
             }
-            res = requests.get(f"{BASE_URL}/sessions", params=params)
+            res = requests.get(f"{BASE_URL}/sessions", params=params, timeout=5)
+            res.raise_for_status()
             sessions = res.json()
             
             if not sessions:
@@ -53,10 +54,12 @@ def lambda_handler(event, context):
                 session_key = get_latest_session_key_for_year(year)
             
             # 3. Fetch drivers and standings using the resolved session_key
-            drivers_res = requests.get(f"{BASE_URL}/drivers", params={"session_key": session_key})
+            drivers_res = requests.get(f"{BASE_URL}/drivers", params={"session_key": session_key}, timeout=5)
+            drivers_res.raise_for_status()
             drivers_map = {d["driver_number"]: d for d in drivers_res.json()}
             
-            standings_res = requests.get(f"{BASE_URL}/championship_drivers", params={"session_key": session_key})
+            standings_res = requests.get(f"{BASE_URL}/championship_drivers", params={"session_key": session_key}, timeout=5)
+            standings_res.raise_for_status()
             standings_data = standings_res.json()
             
             # 4. Merge and format standings
