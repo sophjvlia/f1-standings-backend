@@ -36,6 +36,12 @@ Resources:
           Properties:
             Path: /drivers_championship
             Method: GET
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-0ec8ea7056e89c3f0
+        SubnetIds:
+          - subnet-0f8d93b07beaf3a93
+          - subnet-05cf3b5e0b389bd9b
 
 Outputs:
   DriversChampionshipApiUrl:
