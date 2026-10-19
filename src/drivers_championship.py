@@ -87,11 +87,35 @@ def get_standings_for_year(year):
 
 # AWS Lambda Entry Point
 def lambda_handler(event, context):
-    # Get year from query string parameters (e.g., /standings?year=2024), default to 2026
     query_params = event.get("queryStringParameters") or {}
     year = query_params.get("year", "2026")
     
     try:
+        # Validate that the year is numeric and >= 2023
+        try:
+            year_int = int(year)
+        except ValueError:
+            return {
+                "statusCode": 400,
+                "headers": {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*"
+                },
+                "body": json.dumps({"error": "Invalid year format. Please provide a valid 4-digit year."})
+            }
+            
+        if year_int < 2023:
+            return {
+                "statusCode": 400,
+                "headers": {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*"
+                },
+                "body": json.dumps({
+                    "error": f"Data for year {year} is not available. OpenF1 only supports data from 2023 onwards."
+                })
+            }
+
         standings = get_standings_for_year(year)
         return {
             "statusCode": 200,
@@ -101,6 +125,7 @@ def lambda_handler(event, context):
             },
             "body": json.dumps(standings)
         }
+        
     except Exception as e:
         return {
             "statusCode": 500,
